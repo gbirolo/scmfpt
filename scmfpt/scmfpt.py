@@ -8,7 +8,8 @@ from torch import nn
 def numpy2torch(array):
   return torch.tensor(array, dtype=torch.float32, device=dev)
 
-class NNMFModule(nn.Module):
+class SNCMFModule(nn.Module):
+  """Semi-Negative Convex Matrix Factorization"""
   def __init__(self, k, n_samples=None, n_feats=None, X=None, method='random'):
     super().__init__()
     if X is not None:
@@ -43,15 +44,20 @@ class NNMFModule(nn.Module):
     self.components = nn.Parameter(self.components.to(device))
     self.profiles = nn.Parameter(self.profiles.to(device))
     return self
-
-def fit(model, X, epochs=10000, opt=torch.optim.SGD, opt_kws={}):
-  reconstruction_loss_fn = nn.MSELoss()
-  optimizer = opt(model.parameters(), **opt_kws)
-  for i in range(epochs):
-    pred = model()
-    train_loss = reconstruction_loss_fn(pred, X) + model.inner_loss()
+class SCMF:
+  def __init__(self, k, n_samples=None, n_feats=None, X=None, method='random', epochs=50000, optimizer=torch.optim.SGD, optimizer_kws={}):
+    self.model = SNCMFModule(k, n_samples, n_feats, X, method)
+    self.optimizer = optimizer(model.parameters(), **optimizer_kws)
+    self.epochs = epochs
     
-    optimizer.zero_grad()
-    train_loss.backward()
-    optimizer.step()
-  return model
+  def fit(self, X):
+    reconstruction_loss_fn = nn.MSELoss()
+    for i in range(self.epochs):
+      pred = self.model()
+      train_loss = reconstruction_loss_fn(pred, X) + self.model.inner_loss()
+      
+      self.optimizer.zero_grad()
+      train_loss.backward()
+      self.optimizer.step()
+    #with torch.no_grad():
+    return self.model
