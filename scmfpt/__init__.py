@@ -1,0 +1,1 @@
+from .scmfpt import NNMFModule, fit 
