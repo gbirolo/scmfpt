@@ -1,1 +1,1 @@
-from .scmfpt import NNMFModule, fit 
+from .scmfpt import SCMF
