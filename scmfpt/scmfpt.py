@@ -69,4 +69,4 @@ class SCMF:
 
     with torch.no_grad():
       self.model.eval()
-      return self.model.components.numpy(), self.model.profiles.numpy()
+      return self.model.components.detach().numpy(), self.model.profiles.detach().numpy()
